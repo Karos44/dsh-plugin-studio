@@ -1,0 +1,4 @@
+# dsh-plugin-studio's own row; does not replace official plugin manager or its services.
+- insert:
+    - id: dsh-plugin-studio
+      name: dsh-plugin-studio

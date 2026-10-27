@@ -1,0 +1,13 @@
+node_modules/
+*.bak
+*.bak-*
+*.log
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+appearance.json
+plugin-studio/
+*.pem
+*.key
