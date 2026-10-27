@@ -17,16 +17,60 @@
 - **更新：** 检查已安装 npm 第三方插件版本，逐个更新或一键批量更新；走 DSH 官方更新接口。
 - **回退（实验性）：** 管理器记住它自己更新前的旧版本号，之后可尝试安装那个版本。仅对满足官方 `updatable` 条件的 npm 第三方包开放，涉及卸载 / 重装，请先备份重要配置。
 
-## 安装到 DSH Desktop（Windows）
+## 安装（从 GitHub）
 
-1. 下载 ZIP 并解压到一个**固定文件夹**，例如 `D:\DSH\dsh-plugin-studio`，应能看到根目录的 `package.json` 和 `dist` 文件夹。**不要选外层多套了一层的目录**。
-2. 在 DSH 的 **插件 → 添加插件 → 安装第三方插件** 中选择「本地目录」安装该文件夹。若弹框要求填安装来源，可尝试 `link:D:/DSH/dsh-plugin-studio`（改为你电脑的实际路径）。
-3. 选择启用，重启 DSH Desktop（或重启 Web Profile）。
-4. 打开左侧 **插件**，应直接出现工作室卡片网格，不再看到单独的「已安装」标签。原生添加与刷新仍在顶部；进入卡片详情继续使用原版功能。
+已提交可运行的 `dist/` 文件。**直接从 GitHub 安装，不需要下载 ZIP、手动解压，也不需要先运行 `npm run build`。**
 
-如果插件没有出现，请核对当前 DSH 是否有 `plugins.tab` 扩展槽（参考 2026-10 官方插件管理器文档）、本插件是否启用；再看 DSH 日志中 `dsh-plugin-studio` 的报错。插件最低目标版本为 `0.2.1-rc.0`，对更早版本不保证兼容。
+> **安装前：** 如果此前已经用 `link:` 本地目录安装过旧版 `dsh-plugin-studio`，先在 DSH 的插件管理器里移除**旧的安装项**，避免同一个插件被加载两次。不要删除 `~/.dsh/plugin-studio/appearance.json`，那里保存着自定义外观数据。
 
-**建议先试用卡片、外观修改、导入导出，确认一切正常后再考虑批量更新或回退。** 不必修改你现有的 `compaction`、`pruner`、`mnemon`、`soul-md` 配置。
+### Desktop 桌面版（Windows）
+
+如果已经在 Desktop 的 **Manage dsh Command…** 中安装了随桌面版提供的 `dsh` 命令：
+
+1. 至少启动过一次 Desktop，以初始化 `desktop` profile。
+2. **完全退出 DSH Desktop**（检查系统托盘并选择退出；仅关闭窗口可能仍在后台运行）。
+3. 打开 PowerShell，执行：
+
+```powershell
+dsh plugin --profile desktop add "github:Karos44/dsh-plugin-studio#main"
+```
+
+4. 重新启动 Desktop，进入「插件」，确认「插件工作室」已启用并可打开。
+
+**重要：** 只有桌面版自带的、支持管理 Desktop profile 的 `dsh` 命令适用于此方式；普通 npm 安装的 DSH CLI 可能无法修改由桌面程序独占的 `desktop` profile。若出现“找不到 `dsh`”或“不能管理 desktop profile”，请改用下面的桌面界面安装方式。参见 [DeepSeek Harness Desktop 官方说明](https://github.com/deepseek-ai/deepseek-harness/blob/master/apps/desktop/README.md)。
+
+**不使用命令行：** 在 Desktop 的 **插件 → 添加插件 → 安装第三方插件** 中选择 Git / GitHub 来源（具体按钮名称随 DSH 版本变化），填入：
+
+```text
+github:Karos44/dsh-plugin-studio#main
+```
+
+如果界面只接受完整仓库地址，可尝试 `https://github.com/Karos44/dsh-plugin-studio.git`。安装后重启 Desktop。
+
+### Web / 普通 CLI
+
+确保系统已安装可用的 DSH CLI，且安装外部 Bundle 所需的 `pnpm` 可用。运行：
+
+```bash
+dsh plugin --profile web add "github:Karos44/dsh-plugin-studio#main"
+```
+
+然后重启 `web` profile，再到插件页检查是否生效。**此命令只安装到 `web`，不会替桌面版安装。**
+
+### 开发者：克隆源码
+
+只有计划修改源码时才需要以下命令：
+
+```bash
+git clone https://github.com/Karos44/dsh-plugin-studio.git
+cd dsh-plugin-studio
+npm run build
+npm test
+```
+
+若需要让 DSH 直接读取这份工作目录，可以在对应 profile 使用 `link:` 本地包源；注意这个目录之后就成为插件实际运行的来源，**不要放在 Downloads 里，也不要随意移动**。
+
+本插件最低目标 DSH 版本为 `0.2.1-rc.0`；其他版本尚未充分实测。安装后建议先验证卡片、外观修改及导入导出，再使用实验性的更新/回退功能。
 
 ## 替换「已安装」界面与原生按钮
 
@@ -79,7 +123,7 @@ npm test
 npm run check
 ```
 
-打包安装时已包含 `dist/`，在用户电脑上**无需构建**。
+GitHub 仓库已提交 `dist/`，直接安装的用户**无需构建**。
 
 - `src/host.js`：Host 的外观数据 HTTP 端点。
 - `src/store.js`：JSON 输入验证、CAS、原子持久化。
@@ -88,10 +132,3 @@ npm run check
 - `dist/`：生成好的安装入口。
 
 本插件没有接入 Agent 对话、记忆或模型推理能力。
-
-## 贡献与致谢 / Credits
-
-- **Karos44** — 原创构想、产品需求、界面交互设计、测试与反馈（Original concept, product direction, UX design, testing and feedback）
-- **ChatGPT (OpenAI) & DeepSeek Agent「鱼」** — AI 辅助代码实现、迭代与调试（AI-assisted implementation, iteration and debugging）
-
-本项目由人类提出需求并组织测试，AI 工具协助生成和修改代码。源码以项目贡献者名义按 `LICENSE` 中的 MIT 条款开放。
